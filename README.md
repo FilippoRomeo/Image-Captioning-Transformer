@@ -1,130 +1,110 @@
-# 🖼️ Image Captioning Transformer
+# Image Captioning Transformer
 
-A Transformer-based image captioning system implemented from scratch in PyTorch. Supports both **Vision Transformer (ViT)** and **CLIP** as encoders and allows you to choose between a custom **SentencePiece tokenizer** or a pretrained **Hugging Face tokenizer** (`EleutherAI/pythia-160m`).
+A Transformer-based image-captioning system implemented in PyTorch. It supports ViT or CLIP image encoders and can use either a custom SentencePiece tokenizer or a pretrained Hugging Face tokenizer.
 
----
+## Stack
 
-## ✅ Requirements
+- PyTorch
+- Vision Transformer or CLIP encoder
+- Transformer decoder
+- SentencePiece or Hugging Face tokenization
+- Flickr30k dataset
 
-Tested on **Ubuntu 22.04** with:
+## Requirements
+
+Tested on Ubuntu 22.04 with:
 
 - Python 3.11+
-- CUDA-enabled GPU (optional but recommended)
-- `conda` (for environment management)
+- CUDA-enabled GPU recommended for training
+- Conda or another isolated Python environment
 
----
+## Setup
 
-## ⚙️ Setup Instructions
-
-### 1. Clone the Repository
+### Clone the repository
 
 ```bash
-git clone https://github.com/FilippoRomeo/ml-institute-week-4.git
-cd image_captioning_transformer
+git clone https://github.com/FilippoRomeo/Image-Captioning-Transformer.git
+cd Image-Captioning-Transformer
 ```
 
-### 2. Create and Activate Conda Environment
+### Create an environment
 
 ```bash
-conda create -n ai-lab python=3.11 -y
-conda activate ai-lab
+conda create -n image-captioning python=3.11 -y
+conda activate image-captioning
 ```
 
-### 3. Install Required Packages
+### Install dependencies
+
+Install PyTorch for your platform, then the remaining packages:
 
 ```bash
-pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+pip install torch torchvision torchaudio
 pip install transformers datasets sentencepiece tqdm Pillow scikit-learn matplotlib
 ```
 
----
+## Dataset
 
-## 📚 Dataset Setup
-
-The Flickr30k dataset is automatically downloaded from Hugging Face:
+The project uses Flickr30k through Hugging Face Datasets:
 
 ```python
 from datasets import load_dataset
+
 dataset = load_dataset("nlphuji/flickr30k", split="test")
 ```
 
-No manual download required.
+## Tokenization
 
----
+### SentencePiece
 
-## 🔤 Tokenizer Setup
-
-### Option A: Use SentencePiece (default)
-
-Generate captions.txt and train tokenizer:
+Generate the caption corpus and train the tokenizer:
 
 ```bash
 python -c "from data.tokenizer import save_all_captions_to_txt, train_sentencepiece; save_all_captions_to_txt(); train_sentencepiece()"
 ```
 
-This saves `spm.model` and `spm.vocab` in `data/tokenizer/`.
+This writes `spm.model` and `spm.vocab` under `data/tokenizer/`.
 
-### Option B: Use Hugging Face Tokenizer
+### Hugging Face tokenizer
 
-Switch to `HFTokenizerWrapper` in `data/tokenizer.py` and set model to `EleutherAI/pythia-160m`.
+The alternative tokenizer path uses `HFTokenizerWrapper` in `data/tokenizer.py` with `EleutherAI/pythia-160m`.
 
----
-
-## 🏋️ Train the Model
-
-To start training with ViT and SentencePiece:
+## Training
 
 ```bash
 python -m training.train
 ```
 
-This will:
+The training pipeline:
 
-- Split Flickr30k into train/val/test (80/10/10)
-- Train for 20 epochs
-- Save model checkpoints to `checkpoints/`
+- splits Flickr30k into train, validation, and test sets;
+- trains the captioning model;
+- saves checkpoints under `checkpoints/`.
 
-To delete old checkpoints before retraining:
-
-```bash
-rm checkpoints/caption_model_epoch*.pt
-```
-
----
-
-## 🖼️ Generate Captions from Image
-
-After training, run:
+## Inference
 
 ```bash
-python -m inference.generate --image inference/sample.jpg --checkpoint checkpoints/caption_model_epoch10.pt
+python -m inference.generate \
+  --image inference/sample.jpg \
+  --checkpoint checkpoints/caption_model_epoch10.pt
 ```
 
-Expected output:
+Example output:
 
+```text
+Caption: A man in a red shirt is riding a bicycle.
 ```
-🖼️ Caption: A man in a red shirt is riding a bicycle.
-```
 
----
+## Architecture
 
-## 🧠 Architecture Overview
+- **Encoder:** ViT by default, with optional CLIP image features
+- **Decoder:** Transformer decoder implemented in PyTorch
+- **Tokenizers:** custom SentencePiece or Hugging Face tokenizer
 
-- **Encoder**:
-  - ViT patch-based image encoder (default)
-  - Optional: use CLIP for pretrained image features
-- **Decoder**:
-  - Transformer-based decoder implemented from scratch
-- **Tokenizers**:
-  - SentencePiece (trained on Flickr30k)
-  - Hugging Face model tokenizer
+## Project structure
 
----
-
-## 🗂️ Project Structure
-
-```
-image_captioning_transformer/
+```text
+Image-Captioning-Transformer/
 ├── data/
 │   ├── dataset.py
 │   └── tokenizer.py
@@ -137,23 +117,9 @@ image_captioning_transformer/
 ├── inference/
 │   └── generate.py
 ├── checkpoints/
-│   └── (saved model checkpoints)
 └── README.md
 ```
 
----
+## License
 
-## 🧹 Reset Local Code to Remote (if needed)
-
-To reset your repo to match the latest version on GitHub:
-
-```bash
-git fetch origin
-git reset --hard origin/main
-```
-
----
-
-## 📝 License
-
-MIT License
+MIT.
