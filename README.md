@@ -1,47 +1,61 @@
 # Image Captioning Transformer
 
-A Transformer-based image-captioning system implemented in PyTorch. It supports ViT or CLIP image encoders and can use either a custom SentencePiece tokenizer or a pretrained Hugging Face tokenizer.
+A PyTorch image-captioning experiment that combines a visual encoder with a Transformer decoder to generate natural-language descriptions from images.
+
+The repository supports two image-encoding paths, **Vision Transformer (ViT)** and **CLIP**, and two tokenisation strategies, a custom **SentencePiece** model or a Hugging Face tokenizer.
+
+## Architecture
+
+```text
+image
+  ↓
+ViT or CLIP encoder
+  ↓
+visual feature sequence
+  ↓
+Transformer decoder
+  ↓
+caption tokens
+  ↓
+text caption
+```
+
+## What the project explores
+
+- connecting visual encoders to an autoregressive text decoder
+- training a Transformer captioning pipeline in PyTorch
+- custom vs pretrained tokenisation
+- ViT vs CLIP image features
+- Flickr30k dataset preparation, training, checkpointing, and inference
 
 ## Stack
 
-- PyTorch
-- Vision Transformer or CLIP encoder
-- Transformer decoder
-- SentencePiece or Hugging Face tokenization
-- Flickr30k dataset
-
-## Requirements
-
-Tested on Ubuntu 22.04 with:
-
-- Python 3.11+
-- CUDA-enabled GPU recommended for training
-- Conda or another isolated Python environment
+`Python` `PyTorch` `Vision Transformer` `CLIP` `Transformers` `SentencePiece` `Hugging Face Datasets` `Flickr30k`
 
 ## Setup
 
-### Clone the repository
+Clone the repository:
 
 ```bash
 git clone https://github.com/FilippoRomeo/Image-Captioning-Transformer.git
 cd Image-Captioning-Transformer
 ```
 
-### Create an environment
+Create an isolated environment:
 
 ```bash
 conda create -n image-captioning python=3.11 -y
 conda activate image-captioning
 ```
 
-### Install dependencies
-
-Install PyTorch for your platform, then the remaining packages:
+Install PyTorch for your platform, then the remaining dependencies:
 
 ```bash
 pip install torch torchvision torchaudio
 pip install transformers datasets sentencepiece tqdm Pillow scikit-learn matplotlib
 ```
+
+A CUDA-capable GPU is recommended for training.
 
 ## Dataset
 
@@ -53,21 +67,23 @@ from datasets import load_dataset
 dataset = load_dataset("nlphuji/flickr30k", split="test")
 ```
 
-## Tokenization
+The training pipeline handles the project split into train, validation, and test data.
+
+## Tokenisation
 
 ### SentencePiece
 
-Generate the caption corpus and train the tokenizer:
+Generate the caption corpus and train the custom tokenizer:
 
 ```bash
 python -c "from data.tokenizer import save_all_captions_to_txt, train_sentencepiece; save_all_captions_to_txt(); train_sentencepiece()"
 ```
 
-This writes `spm.model` and `spm.vocab` under `data/tokenizer/`.
+This writes the SentencePiece model and vocabulary under `data/tokenizer/`.
 
 ### Hugging Face tokenizer
 
-The alternative tokenizer path uses `HFTokenizerWrapper` in `data/tokenizer.py` with `EleutherAI/pythia-160m`.
+The alternative path uses `HFTokenizerWrapper` in `data/tokenizer.py`, configured with `EleutherAI/pythia-160m`.
 
 ## Training
 
@@ -75,13 +91,11 @@ The alternative tokenizer path uses `HFTokenizerWrapper` in `data/tokenizer.py` 
 python -m training.train
 ```
 
-The training pipeline:
-
-- splits Flickr30k into train, validation, and test sets;
-- trains the captioning model;
-- saves checkpoints under `checkpoints/`.
+Training saves model checkpoints under `checkpoints/`.
 
 ## Inference
+
+Generate a caption from an image and a trained checkpoint:
 
 ```bash
 python -m inference.generate \
@@ -94,12 +108,6 @@ Example output:
 ```text
 Caption: A man in a red shirt is riding a bicycle.
 ```
-
-## Architecture
-
-- **Encoder:** ViT by default, with optional CLIP image features
-- **Decoder:** Transformer decoder implemented in PyTorch
-- **Tokenizers:** custom SentencePiece or Hugging Face tokenizer
 
 ## Project structure
 
@@ -119,6 +127,10 @@ Image-Captioning-Transformer/
 ├── checkpoints/
 └── README.md
 ```
+
+## Scope
+
+This repository is an experimental learning project around multimodal sequence generation. It is intended to expose the components of an image-captioning system rather than hide them behind a pretrained end-to-end captioning API.
 
 ## License
 
